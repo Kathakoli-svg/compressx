@@ -3,7 +3,7 @@
  * Handles compression / decompression via FastAPI backend.
  */
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = "https://compressx.onrender.com/";
 
 // ─── State ───────────────────────────────────────────────
 let currentInputType = "file"; // 'file' | 'text'
@@ -271,7 +271,7 @@ function decodeBits(bitString, codeTable) {
   return {
     decodedBytes,
     remainingBits: currentCode,
-    text: decodedBytes.map(d => String.fromCharCode(d.byte)).join(""),
+    text: decodedBytes.map((d) => String.fromCharCode(d.byte)).join(""),
   };
 }
 
@@ -280,11 +280,16 @@ function decodeBits(bitString, codeTable) {
  */
 function handleDecodeBits() {
   if (!activeCodeTable || Object.keys(activeCodeTable).length === 0) {
-    showToast("No code table loaded. Compress something first or load a table manually.", "error");
+    showToast(
+      "No code table loaded. Compress something first or load a table manually.",
+      "error",
+    );
     return;
   }
 
-  const bitsInput = document.getElementById("decompress-bits-input").value.trim();
+  const bitsInput = document
+    .getElementById("decompress-bits-input")
+    .value.trim();
   if (!bitsInput) {
     showToast("Please enter some binary bits to decode.", "error");
     return;
@@ -342,9 +347,10 @@ function displayDecodeResult(result, originalBits) {
 
   // Rows
   result.decodedBytes.forEach((d, i) => {
-    const charDisplay = (d.byte >= 32 && d.byte <= 126)
-      ? String.fromCharCode(d.byte)
-      : `0x${d.byte.toString(16).padStart(2, "0")}`;
+    const charDisplay =
+      d.byte >= 32 && d.byte <= 126
+        ? String.fromCharCode(d.byte)
+        : `0x${d.byte.toString(16).padStart(2, "0")}`;
 
     const cells = [
       { text: `${i + 1}`, cls: "db-cell db-step" },
@@ -373,7 +379,9 @@ function displayDecodeResult(result, originalBits) {
   }
 
   document.getElementById("decompress-result").classList.add("visible");
-  showToast(`Decoded ${result.decodedBytes.length} character${result.decodedBytes.length !== 1 ? "s" : ""}!`);
+  showToast(
+    `Decoded ${result.decodedBytes.length} character${result.decodedBytes.length !== 1 ? "s" : ""}!`,
+  );
 }
 
 /**
@@ -417,7 +425,8 @@ function setupBitsInput() {
     // If user typed non-binary chars, strip them
     if (raw !== clean) {
       input.value = clean;
-      hintEl.textContent = "⚠️ Only 0s and 1s allowed — invalid characters removed.";
+      hintEl.textContent =
+        "⚠️ Only 0s and 1s allowed — invalid characters removed.";
       hintEl.className = "bits-input-hint warn";
     } else {
       // Live preview if code table is loaded
@@ -455,10 +464,7 @@ async function handleDecompress() {
   }
 
   if (!pkgText) {
-    showToast(
-      "Please paste a JSON package or upload a .json file.",
-      "error",
-    );
+    showToast("Please paste a JSON package or upload a .json file.", "error");
     return;
   }
 
@@ -589,4 +595,3 @@ document.addEventListener("DOMContentLoaded", () => {
   setupBitsInput();
   setupJsonDropZone();
 });
-
