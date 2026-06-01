@@ -3,7 +3,7 @@
  * Handles compression / decompression via FastAPI backend.
  */
 
-const API_BASE = "https://compressx.onrender.com/";
+const API_BASE = "https://compressx.onrender.com";
 
 // ─── State ───────────────────────────────────────────────
 let currentInputType = "file"; // 'file' | 'text'
