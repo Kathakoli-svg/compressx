@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Compress and decompress images, audio, and text using Huffman and Shannon-Fano encoding algorithms."
+    />
+    <title>CompressX — Huffman &amp; Shannon-Fano Encoder</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- Loading Spinner -->
+    <div class="spinner-overlay" id="spinner">
+      <div class="spinner"></div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <div class="app-container">
+      <!-- Header -->
+      <header class="app-header">
+        <h1>⚡ CompressX</h1>
+        <p>Huffman &amp; Shannon-Fano Compression — Images, Audio &amp; Text</p>
+      </header>
+
+      <!-- Tab Bar -->
+      <div class="tab-bar" role="tablist">
+        <button
+          class="tab-btn active"
+          id="tab-compress-btn"
+          role="tab"
+          aria-selected="true"
+          onclick="switchTab('compress')"
+        >
+          🗜️ Compress
+        </button>
+        <button
+          class="tab-btn"
+          id="tab-decompress-btn"
+          role="tab"
+          aria-selected="false"
+          onclick="switchTab('decompress')"
+        >
+          📂 Decompress
+        </button>
+      </div>
+
+      <!-- ===================== COMPRESS PANEL ===================== -->
+      <section class="panel active" id="panel-compress">
+        <div class="card">
+          <div class="card-title"><span class="icon">📥</span> Input</div>
+
+          <!-- Input type toggle -->
+          <div class="input-toggle" id="compress-input-toggle">
+            <button
+              class="active"
+              onclick="setInputType('file')"
+              id="toggle-file-btn"
+            >
+              📁 File (Image / Audio)
+            </button>
+            <button onclick="setInputType('text')" id="toggle-text-btn">
+              ✏️ Text
+            </button>
+          </div>
+
+          <!-- File input -->
+          <div class="form-group" id="compress-file-group">
+            <div class="file-drop" id="file-drop-zone">
+              <span class="drop-icon">☁️</span>
+              <span class="drop-text"
+                >Drag &amp; drop or <strong>click to browse</strong></span
+              >
+              <input
+                type="file"
+                id="compress-file-input"
+                accept="image/*,audio/*,.txt,.text,.csv,.json,.xml,.html,.md"
+              />
+            </div>
+            <div class="file-info" id="file-info"></div>
+          </div>
+
+          <!-- Text input (hidden by default) -->
+          <div
+            class="form-group"
+            id="compress-text-group"
+            style="display: none"
+          >
+            <label for="compress-text-input">Enter your text</label>
+            <textarea
+              id="compress-text-input"
+              placeholder="Type or paste text here…"
+              rows="6"
+            ></textarea>
+          </div>
+
+          <!-- Algorithm selector -->
+          <div class="form-row">
+            <div class="form-group">
+              <label for="compress-algo">Algorithm</label>
+              <select id="compress-algo">
+                <option value="huffman">Huffman Encoding</option>
+                <option value="shannonfano">Shannon-Fano Encoding</option>
+              </select>
+            </div>
+          </div>
+
+          <button
+            class="btn btn-primary btn-block"
+            id="compress-btn"
+            onclick="handleCompress()"
+          >
+            🗜️ Compress
+          </button>
+        </div>
+
+        <!-- Compression Results -->
+        <div class="result-section" id="compress-result">
+          <div class="card">
+            <div class="card-title">
+              <span class="icon">📊</span> Compression Results
+            </div>
+
+            <div class="stats-grid">
+              <div class="stat-card">
+                <div class="stat-value" id="stat-original">—</div>
+                <div class="stat-label">Original Size</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value" id="stat-compressed">—</div>
+                <div class="stat-label">Compressed (bits)</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value" id="stat-ratio">—</div>
+                <div class="stat-label">Ratio</div>
+              </div>
+            </div>
+
+            <label>Compressed Bit-String</label>
+            <div class="bits-display" id="bits-output"></div>
+
+            <div class="result-actions">
+              <button
+                class="btn btn-secondary"
+                onclick="copyBits()"
+                id="copy-bits-btn"
+              >
+                📋 Copy All Bits
+              </button>
+              <button
+                class="btn btn-secondary"
+                onclick="downloadCompressedData()"
+                id="download-json-btn"
+              >
+                💾 Download Package (.json)
+              </button>
+              <button
+                class="btn btn-primary"
+                onclick="sendToDecompress()"
+                id="send-decompress-btn"
+              >
+                📂 Send to Decompress →
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== DECOMPRESS PANEL ===================== -->
+      <section class="panel" id="panel-decompress">
+        <!-- Raw Bits Input -->
+        <div class="card">
+          <div class="card-title">
+            <span class="icon">🔢</span> Enter Binary Bits
+          </div>
+
+          <div class="form-group">
+            <label for="decompress-bits-input">Type raw binary (0s and 1s only)</label>
+            <div class="bits-input-wrapper">
+              <input
+                type="text"
+                id="decompress-bits-input"
+                placeholder="e.g. 100011010…"
+                autocomplete="off"
+                spellcheck="false"
+              />
+              <span class="bits-count" id="bits-count">0 bits</span>
+            </div>
+            <div class="bits-input-hint" id="bits-input-hint"></div>
+          </div>
+
+          <div class="form-row" style="margin-bottom:16px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="decode-bits-algo">Algorithm</label>
+              <select id="decode-bits-algo">
+                <option value="huffman">Huffman Encoding</option>
+                <option value="shannonfano">Shannon-Fano Encoding</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="decode-actions">
+            <button
+              class="btn btn-primary"
+              id="decode-btn"
+              onclick="handleDecodeBits()"
+              style="flex:1;"
+            >
+              ⚡ Decode Bits
+            </button>
+            <button
+              class="btn btn-secondary"
+              id="clear-bits-btn"
+              onclick="clearBitsInput()"
+            >
+              🗑️ Clear
+            </button>
+          </div>
+        </div>
+
+        <div class="separator">or use full package</div>
+
+        <!-- JSON Package Input (original mode) -->
+        <div class="card">
+          <div class="card-title">
+            <span class="icon">📦</span> JSON Package
+          </div>
+
+          <div class="form-group">
+            <label for="decompress-json-input"
+              >Paste compressed JSON package</label
+            >
+            <textarea
+              id="decompress-json-input"
+              placeholder='Paste the full JSON package here, or use "Send to Decompress" from the Compress tab…'
+              rows="8"
+            ></textarea>
+          </div>
+
+          <div class="form-group">
+            <div class="file-drop" id="json-file-drop-zone">
+              <span class="drop-icon">📄</span>
+              <span class="drop-text"
+                >Drop a <strong>.json package file</strong></span
+              >
+              <input type="file" id="decompress-file-input" accept=".json" />
+            </div>
+          </div>
+
+          <button
+            class="btn btn-primary btn-block"
+            id="decompress-btn"
+            onclick="handleDecompress()"
+          >
+            📂 Decompress
+          </button>
+        </div>
+
+        <!-- Decompression Results -->
+        <div class="result-section" id="decompress-result">
+          <div class="card">
+            <div class="card-title">
+              <span class="icon">✅</span> Decoded Output
+            </div>
+            <div class="decompress-output" id="decompress-output"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
